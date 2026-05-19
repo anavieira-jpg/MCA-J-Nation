@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>Mindera Code Academy</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@600;800;900&family=JetBrains+Mono:wght@500&family=Chakra+Petch:ital,wght@0,700;1,700&family=Montserrat:ital,wght@0,900;1,900&display=swap" rel="stylesheet">
+<style>
+/* ── Reset ── */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;width:100%}
+body{
+  font-family:'Barlow',sans-serif;
+  background:#fff;
+  color:#000;
+  overflow-x:hidden;
+  -webkit-tap-highlight-color:transparent;
+  -webkit-touch-callout:none;
+  -webkit-user-select:none;
+  user-select:none;
+  touch-action:manipulation;
+}
+
+/* ── Pages ── */
+.page{display:none;min-height:100vh;flex-direction:column}
+.page.active{display:flex}
+
+/* ══════════════════════════════════════
+   FORMULÁRIO
+══════════════════════════════════════ */
+:root{
+  --mca-yellow:#FFE234;
+  --mca-black:#000000;
+  --mca-white:#ffffff;
+  --mca-grey:#f8f8f8;
+  --mca-border:1px solid #000000;
+}
+-webkit-user-select:auto;
+#page-form{-webkit-user-select:auto;user-select:auto}
+#page-form input, #page-form textarea, #page-form label{-webkit-user-select:auto;user-select:auto;touch-action:auto}
+
+.sync-loader{position:fixed;top:0;left:0;width:100%;height:4px;background:rgba(0,0,0,.05);z-index:1000}
+#sync-bar{height:100%;width:0%;background:var(--mca-black);transition:width .6s cubic-bezier(.65,0,.35,1)}
+
+nav{padding:24px 40px;display:flex;justify-content:space-between;align-items:center;border-bottom:var(--mca-border)}
+.status-pill{font-family:'JetBrains Mono',monospace;font-size:.7rem;text-transform:uppercase;border:1px solid #000;padding:4px 12px;border-radius:20px}
+
+.hero{padding:60px 40px;border-bottom:var(--mca-border);background:var(--mca-yellow)}
+h1.form-h1{font-size:clamp(2.5rem,6vw,4.5rem);font-weight:900;text-transform:uppercase;line-height:.9;letter-spacing:-1.5px}
+.hero-meta{margin-top:20px;font-weight:600;text-transform:uppercase;font-size:.9rem;display:flex;gap:20px}
+
+.main-grid{display:grid;grid-template-columns:1fr 1fr;flex:1}
+.side-content{padding:60px 40px;border-right:var(--mca-border);display:flex;flex-direction:column;justify-content:space-between}
+.form-content{padding:60px 40px;background:var(--mca-grey)}
+
+.step-indicator{margin-bottom:40px}
+.step-label{font-family:'JetBrains Mono',monospace;font-size:.75rem;color:rgba(0,0,0,.4);margin-bottom:8px;display:block}
+.step-title{font-size:1.8rem;font-weight:900;text-transform:uppercase;margin-bottom:24px}
+
+.input-group{margin-bottom:30px}
+input[type="text"],input[type="email"]{
+  width:100%;padding:16px;border:var(--mca-border);background:transparent;
+  font-family:'Barlow',sans-serif;font-weight:600;font-size:1.1rem;outline:none;
+  transition:background .3s;-webkit-user-select:auto;user-select:auto;touch-action:auto
+}
+input[type="text"]:focus,input[type="email"]:focus{background:var(--mca-yellow)}
+
+.skills-container{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px}
+.skill-box input{display:none}
+.skill-box label{
+  display:flex;align-items:center;justify-content:center;height:50px;
+  border:var(--mca-border);font-weight:800;font-size:.75rem;text-transform:uppercase;
+  cursor:pointer;transition:all .2s ease;background:white;-webkit-user-select:none;user-select:none
+}
+.skill-box input:checked+label{background:var(--mca-black);color:var(--mca-yellow)}
+
+.other-interest{margin-top:16px}
+.other-interest-label{font-family:'JetBrains Mono',monospace;font-size:.7rem;text-transform:uppercase;color:rgba(0,0,0,.45);display:block;margin-bottom:8px;letter-spacing:.05em}
+textarea#outra-area{
+  width:100%;padding:14px 16px;border:var(--mca-border);background:white;
+  font-family:'Barlow',sans-serif;font-weight:600;font-size:.95rem;outline:none;
+  resize:vertical;min-height:80px;transition:background .3s;line-height:1.4;
+  -webkit-user-select:auto;user-select:auto;touch-action:auto
+}
+textarea#outra-area::placeholder{color:rgba(0,0,0,.3);font-weight:600}
+textarea#outra-area:focus{background:var(--mca-yellow)}
+
+.legal-container{margin-top:50px;padding:24px;background:#fff;border:var(--mca-border)}
+.consent-row{display:flex;gap:15px;align-items:flex-start}
+.consent-row input[type="checkbox"]{width:22px;height:22px;accent-color:var(--mca-black);cursor:pointer;margin-top:2px;-webkit-user-select:none}
+.consent-text{font-size:.85rem;font-weight:600;line-height:1.5;color:#333}
+.consent-text a{color:var(--mca-black);text-decoration:underline;text-underline-offset:3px;transition:opacity .2s}
+.consent-text a:hover{opacity:.6}
+
+.submit-area{margin-top:30px}
+.btn-submit{
+  width:100%;padding:24px;background:var(--mca-black);color:white;
+  border:none;font-size:1.2rem;font-weight:900;text-transform:uppercase;
+  cursor:pointer;transition:all .3s;display:flex;justify-content:space-between;
+  font-family:'Barlow',sans-serif;
+}
+.btn-submit:disabled{opacity:.15;cursor:not-allowed}
+.btn-submit:not(:disabled):hover{background:var(--mca-yellow);color:var(--mca-black);transform:translateY(-2px)}
+.btn-submit.loading{opacity:.6;cursor:wait}
+.error-msg{margin-top:12px;padding:12px 16px;background:#fff0f0;border:1px solid #f44;font-size:.85rem;font-weight:600;color:#c00;display:none}
+
+@media(max-width:900px){
+  .main-grid{grid-template-columns:1fr}
+  .side-content{display:none}
+  .hero{padding:40px 20px}
+  .form-content{padding:40px 20px}
+}
+
+/* ══════════════════════════════════════
+   TRANSIÇÃO
+══════════════════════════════════════ */
+#page-transition{
+  position:fixed;inset:0;background:var(--mca-yellow);z-index:5000;
+  display:none;flex-direction:column;align-items:center;justify-content:center;
+  text-align:center;
+}
+#page-transition h2{font-size:clamp(2.5rem,8vw,5rem);font-weight:900;text-transform:uppercase;line-height:.9}
+#page-transition p{font-weight:800;text-transform:uppercase;margin-top:20px;font-size:1rem}
+#transition-count{font-family:'JetBrains Mono',monospace;font-size:.8rem;color:rgba(0,0,0,.5);margin-top:16px}
+
+/* ══════════════════════════════════════
+   ROLETA
+══════════════════════════════════════ */
+#page-wheel{
+  background:#fff;
+  background-image:linear-gradient(rgba(0,0,0,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(0,0,0,.025) 1px,transparent 1px);
+  background-size:44px 44px;
+  align-items:center;justify-content:center;
+  overflow:hidden;
+}
+.wheel-greeting{
+  font-family:'Montserrat',sans-serif;font-weight:900;font-style:italic;
+  font-size:clamp(.75rem,2.5vw,1rem);text-transform:uppercase;
+  color:rgba(0,0,0,.35);margin-bottom:4px;text-align:center;letter-spacing:.05em
+}
+.result-box{height:70px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.result-text{font-family:'Chakra Petch',sans-serif;font-size:clamp(1.4rem,4.5vw,2.8rem);font-style:italic;font-weight:700;text-transform:uppercase;text-align:center}
+.wheel-wrapper{position:relative;flex-shrink:0;margin:10px 0}
+.ring-outer{position:absolute;inset:-12px;border-radius:50%;background:#F5D345;box-shadow:0 12px 40px rgba(0,0,0,.12)}
+.ring-inner{position:absolute;inset:-5px;border-radius:50%;background:#fff}
+.canvas-wrap{position:relative;width:100%;height:100%;z-index:2}
+canvas{display:block;border-radius:50%}
+.arrow{position:absolute;top:-26px;left:50%;transform:translateX(-50%);width:0;height:0;border-left:16px solid transparent;border-right:16px solid transparent;border-top:36px solid #F5D345;z-index:30;filter:drop-shadow(0 4px 6px rgba(0,0,0,.25))}
+.center-dot{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:26px;height:26px;border-radius:50%;background:#F5D345;border:5px solid #fff;z-index:10}
+.spin-btn{
+  flex-shrink:0;padding:18px 0;width:280px;
+  font-family:'Montserrat',sans-serif;font-size:2rem;font-weight:900;font-style:italic;text-transform:uppercase;
+  background:#F5D345;color:#000;border:4px solid #000;cursor:pointer;
+  box-shadow:0 8px 0 #000;-webkit-appearance:none;min-height:68px;margin-top:18px;
+  transition:transform .12s,box-shadow .12s;
+}
+.spin-btn:active:not(:disabled){transform:translateY(5px);box-shadow:0 3px 0 #000}
+.spin-btn:disabled{background:#e8e8e8;color:#bbb;border-color:#ddd;box-shadow:none}
+.settings-btn{position:fixed;bottom:10px;left:10px;background:none;border:none;color:#bbb;font-size:.6rem;font-family:'Montserrat',sans-serif;text-transform:uppercase;padding:12px;min-width:44px;min-height:44px;cursor:pointer;z-index:50}
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:90;align-items:center;justify-content:center}
+.overlay.open{display:flex}
+.stock-panel{background:#fff;border:3px solid #F5D345;padding:24px;width:min(400px,88vw);max-height:75vh;display:flex;flex-direction:column;box-shadow:0 20px 60px rgba(0,0,0,.25)}
+.stock-panel h3{font-size:.85rem;font-weight:900;letter-spacing:.1em;margin-bottom:16px}
+.stock-rows{overflow-y:auto;flex:1;-webkit-overflow-scrolling:touch}
+.stock-row{display:flex;align-items:center;padding:10px 0;border-bottom:1px solid #f0f0f0}
+.stock-label{flex:1;font-weight:900;font-size:.8rem;text-transform:uppercase}
+.stock-input{width:70px;text-align:center;border:2px solid #000;padding:8px 4px;font-size:1rem;font-family:'Montserrat',sans-serif;font-weight:900;-webkit-appearance:none;min-height:44px}
+.stock-close{margin-top:16px;padding:14px;width:100%;font-family:'Montserrat',sans-serif;font-weight:900;font-size:.9rem;text-transform:uppercase;background:#000;color:#fff;border:none;cursor:pointer;min-height:50px}
+.flash{animation:blink .15s step-end 8}
+@keyframes blink{50%{opacity:0}}
+</style>
+</head>
+<body>
+
+<!-- ══ BARRA DE PROGRESSO ══ -->
+<div class="sync-loader"><div id="sync-bar"></div></div>
+
+<!-- ══════════════════════════════════════
+     PÁGINA 1 — FORMULÁRIO
+══════════════════════════════════════ -->
+<div id="page-form" class="page active">
+
+  <nav>
+    <div style="font-weight:900;text-transform:uppercase;letter-spacing:-.5px">Mindera Code Academy</div>
+    <div class="status-pill" id="status-text">Perfil Incompleto</div>
+  </nav>
+
+  <section class="hero">
+    <h1 class="form-h1">Sincroniza o teu<br>Perfil MCA</h1>
+    <div class="hero-meta">
+      <span>Skills Selecionadas: <span id="count">0</span></span>
+      <span>Conclusão: <span id="perc">0%</span></span>
+    </div>
+  </section>
+
+  <div class="main-grid" style="flex:1">
+    <div class="side-content">
+      <div>
+        <h2 style="font-size:2.5rem;font-weight:900;text-transform:uppercase">Build your<br>own path.</h2>
+        <p style="margin-top:20px;font-weight:600;line-height:1.2;font-size:1.1rem">O teu contributo ajuda-nos a definir os próximos bootcamps e workshops.</p>
+      </div>
+      <div style="font-family:'JetBrains Mono',monospace;font-size:.7rem;color:rgba(0,0,0,.4)">MCA_DATABASE_SYNC_2026</div>
+    </div>
+
+    <div class="form-content">
+      <form id="profileForm">
+        <div class="step-indicator">
+          <span class="step-label">PASSO 01</span>
+          <h3 class="step-title">Identificação</h3>
+          <div class="input-group"><input type="text" id="nome" placeholder="NOME COMPLETO" required oninput="updateUI()"></div>
+          <div class="input-group"><input type="email" id="email" placeholder="EMAIL" required oninput="updateUI()"></div>
+        </div>
+
+        <div class="step-indicator">
+          <span class="step-label">PASSO 02</span>
+          <h3 class="step-title">Áreas de Interesse</h3>
+          <div class="skills-container">
+            <div class="skill-box"><input type="checkbox" class="s-check" id="s1" value="QA"><label for="s1">QA</label></div>
+            <div class="skill-box"><input type="checkbox" class="s-check" id="s2" value="DevOps"><label for="s2">DevOps</label></div>
+            <div class="skill-box"><input type="checkbox" class="s-check" id="s3" value="Data"><label for="s3">Data</label></div>
+            <div class="skill-box"><input type="checkbox" class="s-check" id="s4" value="AI"><label for="s4">AI / ML</label></div>
+            <div class="skill-box"><input type="checkbox" class="s-check" id="s5" value="Backend"><label for="s5">Backend</label></div>
+            <div class="skill-box"><input type="checkbox" class="s-check" id="s6" value="Frontend"><label for="s6">Frontend</label></div>
+            <div class="skill-box"><input type="checkbox" class="s-check" id="s7" value="Arch"><label for="s7">Architecture</label></div>
+            <div class="skill-box"><input type="checkbox" class="s-check" id="s8" value="Cloud"><label for="s8">Cloud</label></div>
+            <div class="skill-box"><input type="checkbox" class="s-check" id="s9" value="Mobile"><label for="s9">Mobile</label></div>
+            <div class="skill-box"><input type="checkbox" class="s-check" id="s10" value="UIUX"><label for="s10">UI/UX Design</label></div>
+            <div class="skill-box"><input type="checkbox" class="s-check" id="s11" value="Product"><label for="s11">Product Mgt</label></div>
+            <div class="skill-box"><input type="checkbox" class="s-check" id="s12" value="Project"><label for="s12">Project Mgt</label></div>
+          </div>
+          <div class="other-interest">
+            <span class="other-interest-label">Outra área não listada? Escreve aqui →</span>
+            <textarea id="outra-area" placeholder="Ex: Cybersecurity, Blockchain, Game Dev…" oninput="updateUI()"></textarea>
+          </div>
+        </div>
+
+        <div class="legal-container">
+          <div class="consent-row">
+            <input type="checkbox" id="consent" required onchange="updateUI()">
+            <label for="consent" class="consent-text">
+              Ao submeter este formulário, confirmo que li e aceito a
+              <a href="https://mindera.com/privacy-policy" target="_blank">Privacy Policy</a> e os
+              <a href="https://mindera.com/terms-conditions" target="_blank">Terms and Conditions</a> da Mindera.
+            </label>
+          </div>
+        </div>
+
+        <div class="submit-area">
+          <button type="submit" class="btn-submit" id="submitBtn" disabled>
+            <span id="btn-label">Sincronizar &amp; Girar a Roleta</span>
+            <span id="btn-status">0%</span>
+          </button>
+          <div class="error-msg" id="error-msg">⚠ Erro ao sincronizar. Verifica a tua ligação e tenta novamente.</div>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     TRANSIÇÃO
+══════════════════════════════════════ -->
+<div id="page-transition">
+  <h2>DADOS<br>SINCRONIZADOS.</h2>
+  <p>O teu perfil foi guardado — agora é a tua vez de girar!</p>
+  <div id="transition-count">A abrir a roleta em <span id="t-count">3</span>s…</div>
+</div>
+
+<!-- ══════════════════════════════════════
+     PÁGINA 2 — ROLETA
+══════════════════════════════════════ -->
+<div id="page-wheel" class="page">
+  <div class="result-box"><div class="result-text" id="wr-result">GIRA A RODA</div></div>
+  <div class="wheel-wrapper" id="wr-wrapper">
+    <div class="ring-outer"></div>
+    <div class="ring-inner"></div>
+    <div class="canvas-wrap">
+      <div class="arrow"></div>
+      <canvas id="wr-canvas"></canvas>
+      <div class="center-dot"></div>
+    </div>
+  </div>
+  <button class="spin-btn" id="wr-btn">GIRAR</button>
+  <button class="settings-btn" id="wr-toggle">&#9881; Stock</button>
+</div>
+
+<!-- Stock overlay (fora da page para ficar por cima de tudo) -->
+<div class="overlay" id="wr-overlay">
+  <div class="stock-panel">
+    <h3>GESTÃO DE STOCK</h3>
+    <div class="stock-rows" id="wr-rows"></div>
+    <button class="stock-close" id="wr-close">Fechar</button>
+  </div>
+</div>
+
+<script>
+// ─────────────────────────────────────────────────────────────────────────────
+// CONFIG
+// ─────────────────────────────────────────────────────────────────────────────
+const SHEET_URL="https://script.google.com/macros/s/AKfycbzqXThB8v78Fq4rTzNMAJWi6E5lKyqYSmg3gaqCeeHgJo7vZ2InYB4D_nYY4qWDMRa6/exec";
+
+var PRIZES=[
+  {name:'TOTE BAG',stock:20},{name:'OOOPS',stock:Infinity},
+  {name:'PATINHO',stock:50},{name:'NECESSAIRE',stock:50},
+  {name:'OOOPS',stock:Infinity},{name:'YO-YO',stock:50},
+  {name:'ABRE CAPS',stock:40},{name:'OUTRA VEZ',stock:Infinity},
+  {name:'NOTEBOOK',stock:30},{name:'T-SHIRT',stock:10},
+  {name:'OOOPS',stock:Infinity},{name:'CANECA',stock:10}
+];
+
+// ─────────────────────────────────────────────────────────────────────────────
+// FORMULÁRIO
+// ─────────────────────────────────────────────────────────────────────────────
+var submittedName='';
+
+var checks     = document.querySelectorAll('.s-check');
+var bar        = document.getElementById('sync-bar');
+var countDisp  = document.getElementById('count');
+var percDisp   = document.getElementById('perc');
+var statusText = document.getElementById('status-text');
+var btnStatus  = document.getElementById('btn-status');
+var btnLabel   = document.getElementById('btn-label');
+var submitBtn  = document.getElementById('submitBtn');
+var errorMsg   = document.getElementById('error-msg');
+
+function updateUI(){
+  var progress=0;
+  var n  = document.getElementById('nome').value.trim().length>2;
+  var e  = document.getElementById('email').value.includes('@');
+  var c  = document.getElementById('consent').checked;
+  var sk = document.querySelectorAll('.s-check:checked').length;
+  var outra = document.getElementById('outra-area').value.trim().length>0;
+  var hasArea = sk>0||outra;
+  if(n) progress+=25;
+  if(e) progress+=25;
+  if(c) progress+=25;
+  if(hasArea) progress+=25;
+  bar.style.width=progress+'%';
+  countDisp.innerText=sk;
+  percDisp.innerText=progress+'%';
+  btnStatus.innerText=progress+'%';
+  if(progress===100){statusText.innerText='Pronto para Sincronizar';statusText.style.background='var(--mca-yellow)';}
+  else{statusText.innerText='Perfil Incompleto';statusText.style.background='transparent';}
+  submitBtn.disabled=!(n&&e&&c&&hasArea);
+}
+checks.forEach(function(box){box.addEventListener('change',updateUI);});
+
+document.getElementById('profileForm').addEventListener('submit',async function(ev){
+  ev.preventDefault();
+  errorMsg.style.display='none';
+  var nome  = document.getElementById('nome').value.trim();
+  var email = document.getElementById('email').value.trim();
+  var skills= [...document.querySelectorAll('.s-check:checked')].map(function(c){return c.value;});
+  var outra = document.getElementById('outra-area').value.trim();
+  submittedName = nome.split(' ')[0]; // primeiro nome para saudação
+
+  submitBtn.classList.add('loading');
+  submitBtn.disabled=true;
+  btnLabel.innerText='A Sincronizar...';
+
+  try{
+    await fetch(SHEET_URL,{
+      method:'POST',mode:'no-cors',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({nome,email,skills,outra})
+    });
+    showTransition();
+  }catch(err){
+    errorMsg.style.display='block';
+    submitBtn.classList.remove('loading');
+    submitBtn.disabled=false;
+    btnLabel.innerText='Sincronizar & Girar a Roleta';
+  }
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// TRANSIÇÃO
+// ─────────────────────────────────────────────────────────────────────────────
+function showTransition(){
+  var trans=document.getElementById('page-transition');
+  var countEl=document.getElementById('t-count');
+  trans.style.display='flex';
+  var remaining=3;
+  countEl.innerText=remaining;
+  var iv=setInterval(function(){
+    remaining--;
+    countEl.innerText=remaining;
+    if(remaining<=0){
+      clearInterval(iv);
+      trans.style.display='none';
+      goToWheel();
+    }
+  },1000);
+}
+
+function goToWheel(){
+  document.getElementById('page-form').classList.remove('active');
+  var wPage=document.getElementById('page-wheel');
+  wPage.classList.add('active');
+  
+  sizeWheel();
+  draw();
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// ROLETA
+// ─────────────────────────────────────────────────────────────────────────────
+var canvas=document.getElementById('wr-canvas');
+var ctx=canvas.getContext('2d');
+var btn=document.getElementById('wr-btn');
+var result=document.getElementById('wr-result');
+var overlay=document.getElementById('wr-overlay');
+var toggle=document.getElementById('wr-toggle');
+var closeBtn=document.getElementById('wr-close');
+var rowsEl=document.getElementById('wr-rows');
+var wrapper=document.getElementById('wr-wrapper');
+var rotation=0,spinning=false,WPX=0;
+
+function calcSize(){
+  var vw=window.innerWidth||document.documentElement.clientWidth||768;
+  var vh=window.innerHeight||document.documentElement.clientHeight||1024;
+  return Math.max(Math.floor(Math.min(vw-40,vh-220,580)),100);
+}
+function sizeWheel(){
+  WPX=calcSize();
+  wrapper.style.width=WPX+'px';
+  wrapper.style.height=WPX+'px';
+  canvas.style.width=WPX+'px';
+  canvas.style.height=WPX+'px';
+}
+function getActive(){return PRIZES.filter(function(p){return p.stock===Infinity||p.stock>0});}
+function draw(){
+  if(WPX<10)return;
+  var dpr=Math.min(window.devicePixelRatio||1,3);
+  canvas.width=WPX*dpr;canvas.height=WPX*dpr;
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+  var items=getActive(),center=WPX/2,radius=center-2,arc=(2*Math.PI)/items.length;
+  ctx.clearRect(0,0,WPX,WPX);
+  items.forEach(function(item,i){
+    var angle=rotation+i*arc;
+    var colors=['#F5D345','#FFFFFF','#111111'];
+    var fill=colors[i%3],text=fill==='#111111'?'#F5D345':'#000';
+    ctx.beginPath();ctx.moveTo(center,center);
+    ctx.arc(center,center,radius,angle,angle+arc);
+    ctx.fillStyle=fill;ctx.fill();
+    ctx.strokeStyle='#F5D345';ctx.lineWidth=1.5;ctx.stroke();
+    ctx.save();ctx.translate(center,center);ctx.rotate(angle+arc/2);
+    ctx.textAlign='right';ctx.fillStyle=text;
+    var fs=Math.max(11,WPX/22);
+    ctx.font='italic 900 '+fs+'px Montserrat,sans-serif';
+    ctx.fillText(item.name,radius-16,fs/3);
+    ctx.restore();
+  });
+}
+function spin(){
+  if(spinning)return;
+  var items=getActive();if(!items.length)return;
+  spinning=true;btn.disabled=true;
+  result.classList.remove('flash');result.textContent='A SORTEAR...';
+  var t0=performance.now(),dur=4200,r0=rotation%(2*Math.PI);
+  var winIdx=Math.floor(Math.random()*items.length);
+  var arc=(2*Math.PI)/items.length;
+  var fin=(Math.PI*2*10)+(Math.PI*1.5)-winIdx*arc-arc/2;
+  var tot=fin-r0;
+  (function tick(now){
+    var p=Math.min((now-t0)/dur,1),ease=1-Math.pow(1-p,4);
+    rotation=r0+tot*ease;draw();
+    if(p<1){requestAnimationFrame(tick);}
+    else{
+      spinning=false;btn.disabled=false;
+      var w=items[winIdx];result.textContent=w.name;result.classList.add('flash');
+      if(w.stock!==Infinity){w.stock--;buildStock();setTimeout(draw,600);}
+    }
+  })(performance.now());
+}
+function buildStock(){
+  rowsEl.innerHTML='';
+  PRIZES.forEach(function(p,idx){
+    var row=document.createElement('div');row.className='stock-row';
+    row.innerHTML='<span class="stock-label">'+p.name+'</span>'+
+      '<input type="number" inputmode="numeric" class="stock-input" value="'+(p.stock===Infinity?999:p.stock)+'">';
+    row.querySelector('input').addEventListener('change',function(){
+      var v=parseInt(this.value);PRIZES[idx].stock=v>=999?Infinity:v;draw();
+    });
+    rowsEl.appendChild(row);
+  });
+}
+function sp(e){e.stopPropagation();e.preventDefault();}
+btn.addEventListener('touchend',function(e){sp(e);spin();});
+btn.addEventListener('click',function(e){sp(e);spin();});
+toggle.addEventListener('touchend',function(e){sp(e);overlay.classList.add('open');});
+toggle.addEventListener('click',function(e){sp(e);overlay.classList.add('open');});
+closeBtn.addEventListener('touchend',function(e){sp(e);overlay.classList.remove('open');});
+closeBtn.addEventListener('click',function(e){sp(e);overlay.classList.remove('open');});
+overlay.addEventListener('touchend',function(e){if(e.target===overlay)overlay.classList.remove('open');});
+window.addEventListener('resize',function(){sizeWheel();draw();});
+window.addEventListener('orientationchange',function(){setTimeout(function(){sizeWheel();draw();},250);});
+
+// Init roleta (só para ficar pronta quando chegar)
+buildStock();
+setTimeout(function(){sizeWheel();draw();},400);
+</script>
+</body>
+</html>
